@@ -1,42 +1,78 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AR.js Hiro Marker Image</title>
-    
-    <!-- Use stable versions: A-Frame 1.3.0 works best with AR.js 3.4.x -->
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    
+    <script>
+      // This script handles playing/pausing the audio when the marker is seen/lost
+      AFRAME.registerComponent('audio-handler', {
+        init: function () {
+          this.marker = this.el;
+          this.sound = document.querySelector('#myAudio');
+          this.hasInteracted = false;
+
+          // Unlock audio context on first click (Mobile requirement)
+          window.addEventListener('click', () => {
+            this.hasInteracted = true;
+          }, { once: true });
+
+          this.marker.addEventListener('markerFound', () => {
+            if (this.hasInteracted) {
+              this.sound.play();
+            }
+          });
+
+          this.marker.addEventListener('markerLost', () => {
+            this.sound.pause();
+            this.sound.currentTime = 0; // Reset to beginning
+          });
+        }
+      });
+    </script>
+    
+    <style>
+      #overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        font-family: sans-serif;
+      }
+    </style>
   </head>
-  
+
   <body style="margin: 0px; overflow: hidden;">
-    <!-- 1. Use "webcam" instead of "camera" -->
-    <!-- 2. Added "logarithmicDepthBuffer" to prevent flickering (Z-fighting) -->
+    <!-- Tap to Start Overlay -->
+    <div id="overlay" onclick="this.style.display='none'">
+      <p>Tap anywhere to start AR & Audio</p>
+    </div>
+
     <a-scene 
       embedded 
       arjs="sourceType: webcam; debugUIEnabled: false;" 
       vr-mode-ui="enabled: false"
       renderer="logarithmicDepthBuffer: true;">
       
-      <!-- Preloading assets is better for performance -->
       <a-assets>
         <img id="my-image" src="23.png">
+        <!-- Add your audio file here -->
+        <audio id="myAudio" src="sound.mp3" preload="auto"></audio>
       </a-assets>
 
-      <a-marker preset="hiro">
-        <!-- 
-          - Position: 0 0.01 0 (Lifts it slightly above marker to avoid flickering)
-          - Rotation: -90 0 0 (Lays it flat on the marker)
-          - Width/Height: 1 1.41 (Keeps your A4 aspect ratio)
-        -->
+      <!-- Added the 'audio-handler' component here -->
+      <a-marker type="pattern" url="pattern-book.patt" audio-handler>
         <a-plane 
           src="#my-image" 
-          position="0 0.01 0" 
+          position="0 0.1 0" 
           rotation="-90 0 0" 
           width="1" 
-          height="1.41"
-          material="transparent: true; alphaTest: 0.5;">
+          height="1.41">
         </a-plane>
       </a-marker>
 
@@ -44,4 +80,3 @@
     </a-scene>
   </body>
 </html>
-
