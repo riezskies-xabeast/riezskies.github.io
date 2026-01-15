@@ -2,18 +2,18 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AR Book Project</title>
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     
     <script>
-      // This script handles playing/pausing the audio when the marker is seen/lost
       AFRAME.registerComponent('audio-handler', {
         init: function () {
           this.marker = this.el;
           this.sound = document.querySelector('#myAudio');
           this.hasInteracted = false;
 
-          // Unlock audio context on first click (Mobile requirement)
+          // Unlock audio for mobile
           window.addEventListener('click', () => {
             this.hasInteracted = true;
           }, { once: true });
@@ -26,7 +26,7 @@
 
           this.marker.addEventListener('markerLost', () => {
             this.sound.pause();
-            this.sound.currentTime = 0; // Reset to beginning
+            this.sound.currentTime = 0; 
           });
         }
       });
@@ -34,45 +34,39 @@
     
     <style>
       #overlay {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.5);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 999;
-        font-family: sans-serif;
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7); color: white;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 999; font-family: sans-serif; text-align: center; padding: 20px;
       }
     </style>
   </head>
 
   <body style="margin: 0px; overflow: hidden;">
-    <!-- Tap to Start Overlay -->
     <div id="overlay" onclick="this.style.display='none'">
-      <p>Tap anywhere to start AR & Audio</p>
+      <h1>Ready?</h1>
+      <p>Tap the screen to start the AR experience.</p>
     </div>
 
     <a-scene 
       embedded 
-      arjs="sourceType: webcam; debugUIEnabled: false;" 
+      arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;" 
       vr-mode-ui="enabled: false"
-      renderer="logarithmicDepthBuffer: true;">
+      renderer="logarithmicDepthBuffer: true; antialias: true; alpha: true;">
       
       <a-assets>
         <img id="my-image" src="23.png">
-        <!-- Add your audio file here -->
         <audio id="myAudio" src="sound.mp3" preload="auto"></audio>
       </a-assets>
 
-      <!-- Added the 'audio-handler' component here -->
+      <!-- URL must match your new .patt file name -->
       <a-marker type="pattern" url="pattern-book.patt" audio-handler>
         <a-plane 
           src="#my-image" 
-          position="0 0.1 0" 
+          position="0 0.05 0" 
           rotation="-90 0 0" 
-          width="1" 
-          height="1.41">
+          width="1.2" 
+          height="1.7">
         </a-plane>
       </a-marker>
 
